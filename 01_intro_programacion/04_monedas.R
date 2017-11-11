@@ -1,17 +1,23 @@
-#Coin sizes vector
-coinSizes <- c(1, 2, 5, 10, 20, 50, 100, 200)
+#Coin values vector in pennies
+coinValues <- c("1p"=1, "2p"=2, "5p"=5, "10p"=10, "20p"=20, "50p"=50, "£1"=100, "£2"=200)
 
-#Create a vector with 201 zeros
+#Create a vector with 201 zeros. Each component represents the number of ways to return index-1 pennies using coins with values
+#in coinValues vector
 ways <- rep(0, 201)
-#First position of the vector corresponds to 0 pound
+
+#Initialization of the vector. It's only one way to return 1-1 = 0 pennies.
 ways[1] = 1
 
-for (coinSize in coinSizes){
-  for(i in coinSize:length(ways)){
-    if(i-coinSize > 0){
-      ways[i] = ways[i] + ways[i-coinSize]  
+for (coinValue in coinValues){
+  for(i in coinValue:length(ways)){
+    if(i-coinValue > 0){
+      ways[i] = ways[i] + ways[i-coinValue]  
     }
   }
 }
 
+#Number of ways to return 2 pounds
 total <- ways[201]
+
+#Print out the result
+paste("£2 can be made with", ways[201], "combinations using", paste(names(coinValues), collapse=", "), "coins", sep=" ")
