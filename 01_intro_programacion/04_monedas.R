@@ -20,4 +20,4 @@ for (coinValue in coinValues){
 total <- ways[201]
 
 #Print out the result
-paste("£2 can be made with", ways[201], "combinations using", paste(names(coinValues), collapse=", "), "coins", sep=" ")
+paste("£2 can be made with", total, "combinations using", paste(names(coinValues), collapse=", "), "coins", sep=" ")
