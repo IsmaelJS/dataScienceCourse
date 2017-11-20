@@ -1,5 +1,5 @@
 ### Get the address from (lat= "51.4965946", lon="-0.1436476")
-r_address <- GET("http://nominatim.openstreetmap.org/reverse?", query= list(format = "json", lat= "51.4965946", lon="-0.1436476"))
+r_address <- GET("http://nominatim.openstreetmap.org/reverse", query= list(format = "json", lat= "51.4965946", lon="-0.1436476"))
 address <- content(r_address)$address
 
 ### Get number of crimes commited in that location in April 2017
