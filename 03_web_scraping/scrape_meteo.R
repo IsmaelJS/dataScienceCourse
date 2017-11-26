@@ -27,3 +27,6 @@ sorted_df_meteo<- df_meteo[order(df_meteo[,1], df_meteo[,2]),]
 
 row_with_missing_values <- which(is.na(sorted_df_meteo), arr.ind=TRUE)
 
+##Clean rows with missing values
+
+clean_df_meteo <- na.omit(sorted_df_meteo)
