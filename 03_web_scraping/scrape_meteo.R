@@ -4,7 +4,7 @@ library(rvest)
 get_df_meteo <- function(month, year){
   ##Get number of days of the month
   if(month < 12){
-    n_days <- day (as.Date(paste(year,month + 1,1, sep="-")) - 1)   
+    n_days <- day (as.Date(paste(year, month + 1, 1, sep="-")) - 1)   
   }else{
     n_days <- day (as.Date(paste(year+1, 1, 1, sep="-")) - 1) 
   }
@@ -20,7 +20,7 @@ df_meteo <- do.call("rbind", list_df_meteo)
 
 colnames(df_meteo) <- c("date", "hour", "T(C)", "ddd", "ff kmh")
 
-sorted_df_meteo<- df_meteo[order(df_meteo[,1]),]
+sorted_df_meteo <- df_meteo[order(df_meteo[,1]),]
 
 ##We figure out the #6896 observation has missing values in column 2 and 4, that refers to T(C) and ff-kmh
 
