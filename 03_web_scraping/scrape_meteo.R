@@ -22,7 +22,7 @@ colnames(df_meteo) <- c("date", "hour", "T(C)", "ddd", "ff kmh")
 
 sorted_df_meteo<- df_meteo[order(df_meteo[,1]),]
 
-##We figure out the #6896 observation has missing values in column 3 and 5, that refers to T(C) and ff-kmh
+##We figure out the #6896 observation has missing values in column 2 and 4, that refers to T(C) and ff-kmh
 
 row_with_missing_values <- which(is.na(sorted_df_meteo), arr.ind=TRUE)
 
