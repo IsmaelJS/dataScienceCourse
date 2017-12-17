@@ -2,41 +2,82 @@
 title: "Calidad del aire Madrid en 2017"
 author: "Ismael Jiménez"
 date: "16 de diciembre de 2017"
-output: pdf_document
+output: html_document
 ---
 
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-```{r, include=FALSE}
 ##Load data from file
 library("readxl")
+library("dplyr")
+
 data <- read_excel("calidadDelAire_madrid_2017_diarios.xlsx")
+
+months <- c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre")
 
 ##Select NO2 magnitude
 
 data_no2 <- data[data$MAGNITUD == "08",]
-
 ```
 
-```{r cars}
-summary(cars)
+## Introducción
+
+En este estudio se utilizan datos generados por un conjunto de estaciones situadas en diferentes puntos de la ciudad de Madrid.
+<br/>
+La magnitud objeto del estudio es el NO2, un compuesto químico que provoca efectos nocivos en las salud de las personas.
+
+## Fuente de datos
+
+La fuente de datos utilizada en el estudio contiene los valores medios diarios desde enero hasta noviembre del año 2017 para cada una de las 24 estaciones repartidas por la ciudad de Madrid.
+
+## Niveles de NO2 en el centro de Madrid
+
+Para el estudio de los niveles de NO2 en el centro de Madrid se han seleccionado los datos generados en la estación ubicada en la Plaza de España.
+<br/>
+
+```{r, echo=FALSE}
+
+plaza_de_espania <- data_no2 %>% 
+  filter(data_no2$ESTACION == "28079004") %>%
+  select(7:37) %>%
+  t() %>%
+  as_tibble %>%
+  `colnames<-` (months)
+  
+boxplot(plaza_de_espania, xlab="Mes", ylab="NO2 microgramos/m3", main="Estación en Plaza de España - Año 2017")
 ```
 
-## Including Plots
+Podemos observar que en los meses de octubre y noviembre se alcanzó el valor máximo medio diario de 100 micro gramos por metro cúbico, debido principalmente a la falta de precipitaciones.
 
-You can also embed plots, for example:
+A continuación vamos a utlizar la función summary provista por R para mostrar la media, mediana,los cuartiles 25 y 75, el máximo y el mínimo de cada mes, que nos va a resultar útil para comparar la variación de la calidad del aire a lo largo del año:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, echo=TRUE}
+summary(plaza_de_espania)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Niveles de NO2 en las afueras de Madrid
+
+A continuación vamos a analizar los niveles de NO2 en las afueras de Madrid. Para ello utilizamos los datos generados por la estación ubicada en el Pardo.
+
+```{r, echo=FALSE}
+el_pardo <- data_no2 %>% 
+  filter(data_no2$ESTACION == "28079058") %>%
+  select(7:37) %>%
+  t() %>%
+  as_tibble %>%
+  `colnames<-`(c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre"))
+
+boxplot(el_pardo, xlab="Mes", ylab="NO2 microgramos/m3", main="Estación en El Pardo - Año 2017")
+```
+
+Complementamos el boxplot con los datos estadísticos que nos proporciona la función summary.
+
+```{r, echo=FALSE}
+summary(el_pardo)
+```
+
+En el gráfico podemos observar que Noviembre es el mes con mayor variabilidad y donde se alcanzó el máximo de 60 microgramos/m3, debido principalemente a los meses acumulados sin precipitaciones.
+<br/><br/>
+Comparando los datos estadísticos de las zonas estudiadas observamos una clara mejoría en la calidad del aire en las afueras de Madrid.
