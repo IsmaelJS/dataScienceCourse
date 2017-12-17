@@ -12,7 +12,7 @@ output: html_document
 library("readxl")
 library("dplyr")
 
-data <- read_excel("calidadDelAire_madrid_2017_diarios.xlsx")
+data <- read_excel("dat/calidadDelAire_madrid_2017_diarios.xlsx")
 
 months <- c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre")
 
