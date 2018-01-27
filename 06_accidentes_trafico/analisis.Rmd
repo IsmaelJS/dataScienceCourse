@@ -1,0 +1,56 @@
+---
+title: "Análisis estadístico"
+author: "Ismael Jiménez"
+date: "27 de enero de 2018"
+output: html_document
+---
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(readxl)
+
+#Input files
+input_file_traffic <- "dat/series_fallecidos_2016.xlsx"
+input_file_cars <- "dat/series_parque_2016.xlsx"
+
+#Read traffic file
+traffic_dataset <- read_excel(path = input_file_traffic, sheet = 3, skip = 2)
+traffic <- traffic_dataset[,c(1,14)] 
+colnames(traffic) <- c("YEAR", "TOTAL_DEAD")
+```
+# Informe sobre accidentes de tráfico
+## Introducción
+En este informe vamos a realizar un estudio sobre la evolución del número de fallecidos en accidentes de tráfico desde el año 1993 hasta el 2016 Para ello vamos a utilizar un fichero de datos publicado por la DGT que puede ser descargado desde este [enlace](http://www.dgt.es/es/seguridad-vial/estadisticas-e-indicadores/accidentes-30dias/series-historicas/)
+
+## Análisis estadístico
+Vamos a representar la evolución de los fallecidos en accidentes de tráfico desde el año 1993 hasta el 2016. 
+
+```{r echo=FALSE}
+plot(x = traffic$YEAR, y = traffic$TOTAL_DEAD, type="l", xlab="Año", ylab="nº fallecidos")
+axis(1, at = seq(from=1993, to=2016, by=5))
+```
+
+Podemos ver que a partir del año 2013 se revertió la tendencia descendente del número de fallecidos:
+
+```{r echo=FALSE}
+traffic_subset <-  traffic[traffic$YEAR>=2012,]
+plot(x = traffic_subset$YEAR , y = traffic_subset$TOTAL_DEAD, type="l", xlab="Año", ylab="nº fallecidos")
+axis(1, at = seq(2012, 2016, by=1))
+```
+
+Esto puede haber ocurrido porque haya aumentado el número de coches en circulación, y con ello el número de fallecidos en accidentes de tráfico. Para corroborar esta teoría vamos a analizar la evolución del número de fallecidos por cada millón de vehículos. 
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+vehicle_fleet_dataset <- read_excel(path = input_file_cars, sheet=1, skip=2)
+vehicle_fleet <- vehicle_fleet_dataset[,c(1,9)]
+colnames(vehicle_fleet) <- c("YEAR","TOTAL_FLEET")
+merged_dataset <- merge(traffic[traffic$YEAR>=2012,], vehicle_fleet[vehicle_fleet$YEAR>=2012,], by="YEAR")
+merged_dataset$RATIO <- merged_dataset$TOTAL_DEAD / merged_dataset$TOTAL_FLEET * 1e6
+```
+
+```{r echo=FALSE}
+plot(x= merged_dataset$YEAR, y= merged_dataset$RATIO, type="l", xlab="Año", ylab="nº fallecidos/ 1e6 vehículos circulando")
+axis(1, at = seq(2012, 2016, by = 1))
+```
+
+Podemos observar que la tendencia descendente del valor del ratio no se revierte hasta el año 2015, a diferencia del gráfico anterior en el que se revertía a partir del año 2013.
