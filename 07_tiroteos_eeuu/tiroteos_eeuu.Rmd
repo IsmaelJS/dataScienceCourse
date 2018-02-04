@@ -117,7 +117,8 @@ shootings_data[index,"Location"] <- "Washington, Washington"
 
 # Separate into city and state
 shootings_data <- separate(shootings_data, 3, c("City", "State"), fill="right", sep=",(?=[^,]+$)")
-
+shootings_data$State <- trim(shootings_data$State)
+shootings_data$City <- trim(shootings_data$City)
 ```
 
 Observamos que a veces las columnas Fatalities y Injured no suman Total.victims, por ello actualizamos el valor de la misma:
@@ -143,7 +144,7 @@ getStateFromGeo <- function(lat, lon, state){
     data <- content(resp, "parsed")
     data$features[[1]]$properties$state
   }else{
-    trim(state)
+    state
   }
 }
 

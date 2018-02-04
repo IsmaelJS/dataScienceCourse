@@ -197,7 +197,9 @@ index &lt;- shootings_data$Location == &quot;Washington D.C.&quot;
 shootings_data[index,&quot;Location&quot;] &lt;- &quot;Washington, Washington&quot;
 
 # Separate into city and state
-shootings_data &lt;- separate(shootings_data, 3, c(&quot;City&quot;, &quot;State&quot;), fill=&quot;right&quot;, sep=&quot;,(?=[^,]+$)&quot;)</code></pre>
+shootings_data &lt;- separate(shootings_data, 3, c(&quot;City&quot;, &quot;State&quot;), fill=&quot;right&quot;, sep=&quot;,(?=[^,]+$)&quot;)
+shootings_data$State &lt;- trim(shootings_data$State)
+shootings_data$City &lt;- trim(shootings_data$City)</code></pre>
 <p>Observamos que a veces las columnas Fatalities y Injured no suman Total.victims, por ello actualizamos el valor de la misma:</p>
 <pre class="r"><code>shootings_data$Total.victims &lt;- shootings_data$Fatalities + shootings_data$Injured</code></pre>
 <p>Eliminamos los duplicados por estado y fecha:</p>
@@ -212,7 +214,7 @@ getStateFromGeo &lt;- function(lat, lon, state){
     data &lt;- content(resp, &quot;parsed&quot;)
     data$features[[1]]$properties$state
   }else{
-    trim(state)
+    state
   }
 }
 
