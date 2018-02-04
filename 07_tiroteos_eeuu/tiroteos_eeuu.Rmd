@@ -1,0 +1,182 @@
+---
+title: "Limpieza de datos - Tiroteos EEUU"
+author: "Ismael Jiménez"
+date: "3 de febrero de 2018"
+output: html_document
+---
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyr)
+library(stringr)
+library(httr)
+library(gdata)
+library(magrittr)
+
+file_url <- 'dat/us_mass_shootings.csv'
+
+```
+## Limpieza de datos - Tiroteos EEUU
+
+En este ejercicio vamos a realizar una limpieza de un conjunto de datos sobre tiroteos en EEUU.
+En primer lugar importamos los datos desde un fichero csv.
+
+```{r}
+
+shootings_data <- read.csv(file = file_url, header=TRUE, sep=",", stringsAsFactors = FALSE)
+
+```
+
+Observamos que la conversión de tipos no ha sido la esperada en la variable Date. Por ello realizamos una conversión a formato fecha para que los datos puedan ser explotados.
+
+```{r echo=FALSE}
+shootings_data$Date <- as.Date.character(shootings_data$Date, format= "%m/%d/%Y")
+
+```
+
+Ahora vamos a convertir a tipo booleano la variable "Mental.Health.Issues": 
+
+```{r }
+convertToBoolean <- function(x){
+  x <- tolower(x)
+  if(x == 'yes'){
+    TRUE
+  }else if(x == 'no'){
+    FALSE
+  } else{
+    NA
+  }
+  
+}
+
+shootings_data$Mental.Health.Issues <- sapply(shootings_data$Mental.Health.Issues, convertToBoolean)
+
+```
+
+Ahora vamos a convertir a factor la variable "race". Los niveles serán white, black, asian, other.
+```{r }
+convertRaceToFactor <- function(x){
+  x <- tolower(x)
+  white <- c("white", "white american or european american")
+  black <- c("black", "black american or african american")
+  asian <- c("asian", "asian american")
+  unknown <-  c("unknown", "")
+  
+  if(!is.null(x)){
+    if (x %in% white){
+      "white"
+    }else if(x %in% black){
+      "black"
+    }else if(x %in% asian){
+      "asian"
+    }else if(x %in% unknown){
+      "NA"
+    }else{
+      "other"
+    }  
+  } else{
+    "NA"
+  }
+  
+
+}
+
+shootings_data$Race <- sapply(shootings_data$Race, convertRaceToFactor) %>% as.factor
+
+```
+
+Posteriormente convertimos la variable Gender a tipo factor con los niveles male, female, male/female
+
+```{r }
+convertGenderToFactor <- function(x){
+  x <- tolower(x)
+  male <- c("male", "m")
+  female <- c("female", "f")
+  maleFemale <- c("male/female", "m/f")
+  
+  if (x %in% male){
+    "male"
+  }else if(x %in% female){
+    "female"
+  }else if(x %in% maleFemale){
+    "male/female"
+  }else{
+    "NA"
+  }
+}
+
+shootings_data$Gender <- sapply(shootings_data$Gender, convertGenderToFactor) %>% as.factor
+
+```
+
+Separamos la variable Location en City y State
+
+```{r }
+# Special case of washington D.C
+index <- shootings_data$Location == "Washington D.C."
+shootings_data[index,"Location"] <- "Washington, Washington"
+
+# Separate into city and state
+shootings_data <- separate(shootings_data, 3, c("City", "State"), fill="right", sep=",(?=[^,]+$)")
+
+```
+
+Observamos que a veces las columnas Fatalities y Injured no suman Total.victims, por ello actualizamos el valor de la misma:
+
+```{r}
+shootings_data$Total.victims <- shootings_data$Fatalities + shootings_data$Injured
+
+```
+Eliminamos los duplicados por estado y fecha:
+```{r}
+unique_rows <- !(duplicated(shootings_data[,c(4,5)]))
+shootings_data <- shootings_data[unique_rows,]
+```
+
+Ahora vamos a obtener mediante geolocalización inversa los datos de State que sean nulos:
+
+```{r}
+api_geo_url <- "http://photon.komoot.de/reverse?"
+getStateFromGeo <- function(lat, lon, state){
+  if (is.na(state) || is.null(state)){
+    url <- paste(api_geo_url, "lat=", lat, "&lon=", lon, sep = "")
+    resp <- GET(url)
+    data <- content(resp, "parsed")
+    data$features[[1]]$properties$state
+  }else{
+    trim(state)
+  }
+}
+
+shootings_data$State <- mapply(getStateFromGeo, shootings_data$Latitude, shootings_data$Longitude, shootings_data$State, SIMPLIFY = TRUE)
+```
+
+Por ultimo vamos a normalizar todos los nombres de estados convirtiendo las abreviaturas por su nombre completo:
+
+```{r}
+states_file <- "dat/states.csv"
+df_states <- read.csv(states_file, header = TRUE, sep=",", stringsAsFactors = FALSE)
+
+getFullName <- function(abbr){
+  df_states[df_states$Abbreviation == abbr, "State"]
+  
+}
+
+index_abbr <- str_length(shootings_data$State) == 2
+shootings_data[index_abbr, "State"] <- mapply(getFullName, shootings_data[index_abbr, "State"] )
+
+```
+
+Resumen de los datos:
+
+```{r }
+
+summary(shootings_data)
+```
+
+Estructura de datos: 
+
+```{r}
+
+str(shootings_data)
+
+```
