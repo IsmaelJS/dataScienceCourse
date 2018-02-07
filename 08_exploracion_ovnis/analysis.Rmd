@@ -74,8 +74,6 @@ f_shape[max(f_shape$freq)==f_shape$freq,]
 
 ##Duración de los avistamientos
 
-Podemos observar que el tiempo medio de avistamiento ha sido de 3.62 minutos, la mediana fue de 2 minutos, y el tiempo máximo de avistamiento fue de 19.9 minutos.
-
 Se han descartado del análisis avistamientos de más de 20 minutos de duración por sentido común.
 
 ```{r}
@@ -89,4 +87,12 @@ ufos_df$difference_time <- as.numeric(ufos_df$date_posted - ufos_df$date)
 ufos_df <- ufos_df[which(ufos_df$difference_time < 100 & ufos_df$difference_time >= 0),]
 summary(ufos_df$difference_time)
 hist(ufos_df$difference_time, col = "blue", xlab = "Diferencia de fechas(Días)", ylab= "Frequencia", main = "Diferencia entre avistamiento y publicación del mismo")
+```
+
+##Distribucíon de avistamientos en el tiempo
+
+```{r}
+df_count <- count(ufos_df, "date") 
+
+plot(x = df_count$date, y= df_count$freq, type="l", xlab = "Fecha", ylab= "Frecuencia")
 ```
