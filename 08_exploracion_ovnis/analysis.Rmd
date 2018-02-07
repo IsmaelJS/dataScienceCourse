@@ -1,0 +1,92 @@
+---
+title: "Exploración OVNIs"
+author: "Ismael Jiménez"
+date: "5 de febrero de 2018"
+output: html_document
+---
+
+
+#Análisis avistamientos de ovnis
+
+```{r echo=FALSE, error=FALSE, warning=FALSE, message=FALSE}
+library(plyr)
+library(gdata)
+library(stringr)
+library(httr)
+
+countries_file <- "dat/countries.csv"
+file_path <- "dat/ufos.csv"
+
+ufos_df <- read.csv(file = file_path, header = TRUE, stringsAsFactors = FALSE)
+countries_df <- read.csv(file = countries_file, header= TRUE, stringsAsFactors = FALSE, na.strings = "")
+countries_df <- countries_df[complete.cases(countries_df),c("country_iso_code", "country_name")] 
+
+getCountryName <- function(code){
+  code <-  toupper(code)
+  if(str_length(code) > 0){
+    country <- countries_df[countries_df$country_iso_code == code, "country_name"]
+    country
+  } else {
+    "Unknown"
+  }
+}
+
+```
+
+##Limpieza de datos
+
+```{r error=FALSE, warning=FALSE, message=FALSE}
+colnames <- c("date", "city", "state", "country", "shape", "duration", "coments", "date_posted", "latitude", "longitude")
+ufos_df <- subset(ufos_df, select = -duration..hours.min.)
+colnames(ufos_df) <- colnames
+#Convert types
+ufos_df$date <- as.Date(ufos_df$date, "%m/%d/%Y %H:%M")
+ufos_df$date_posted <- as.Date(ufos_df$date_posted, "%m/%d/%Y")
+ufos_df$duration <- as.numeric(ufos_df$duration) / 60 # minutes
+ufos_df$shape <- as.factor(trim(ufos_df$shape))
+ufos_df$country <- sapply(ufos_df$country, getCountryName)
+
+##Delete no complete cases
+ufos_df <- ufos_df[complete.cases(ufos_df),]
+
+#Delete rows with duration over 20 minutes
+ufos_df <- ufos_df[ufos_df$duration < 20, ]
+
+
+```
+
+##Países donde se han producido avistamientos
+
+Podemos observar que el país donde se han producido más avistamientos ha sido en EEUU.
+```{r}
+count(ufos_df, "country") 
+```
+
+##Formas de OVNIS más frecuentes
+
+La forma de OVNI que más se avistó fue en forma de luz.
+```{r}
+f_shape <- count(ufos_df, "shape")
+
+f_shape[max(f_shape$freq)==f_shape$freq,]
+
+```
+
+##Duración de los avistamientos
+
+Podemos observar que el tiempo medio de avistamiento ha sido de 3.62 minutos, la mediana fue de 2 minutos, y el tiempo máximo de avistamiento fue de 19.9 minutos.
+
+Se han descartado del análisis avistamientos de más de 20 minutos de duración por sentido común.
+
+```{r}
+summary(ufos_df$duration)
+hist(ufos_df$duration, col = "blue", xlab = "Duración(Minutos)", ylab= "Frequencia", main="Duración de avistamiento")
+```
+
+##Distribución del tiempo entre el momento del avistamiento y la fecha de publicación
+```{r}
+ufos_df$difference_time <- as.numeric(ufos_df$date_posted - ufos_df$date)
+ufos_df <- ufos_df[which(ufos_df$difference_time < 100 & ufos_df$difference_time >= 0),]
+summary(ufos_df$difference_time)
+hist(ufos_df$difference_time, col = "blue", xlab = "Diferencia de fechas(Días)", ylab= "Frequencia", main = "Diferencia entre avistamiento y publicación del mismo")
+```
