@@ -13,6 +13,7 @@ library(plyr)
 library(gdata)
 library(stringr)
 library(httr)
+library(lubridate)
 
 countries_file <- "dat/countries.csv"
 file_path <- "dat/ufos.csv"
@@ -89,10 +90,11 @@ summary(ufos_df$difference_time)
 hist(ufos_df$difference_time, col = "blue", xlab = "Diferencia de fechas(Días)", ylab= "Frequencia", main = "Diferencia entre avistamiento y publicación del mismo")
 ```
 
-##Distribucíon de avistamientos en el tiempo
+##Distribución de avistamientos en el tiempo
 
 ```{r}
-df_count <- count(ufos_df, "date") 
+ufos_df$year <- year(ufos_df$date)
+df_count <- count(ufos_df, "year") 
 
-plot(x = df_count$date, y= df_count$freq, type="l", xlab = "Fecha", ylab= "Frecuencia")
+plot(x = df_count$year, y= df_count$freq, type="l", xlab = "Fecha", ylab= "Frecuencia")
 ```
