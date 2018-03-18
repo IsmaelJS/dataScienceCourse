@@ -1,0 +1,60 @@
+---
+title: "Airbnb Analysis"
+author: "Ismael Jiménez"
+date: "17 de marzo de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Análisis del negocio de Airbnb
+
+En este documento se realizará un análisis acerca del modelo de negocio de Airbnb y su actividad en la ciudad de Madrid.
+
+```{r echo=FALSE}
+library(dplyr)
+library(labeling)
+library(ggplot2)
+library(leaflet)
+# Load data from CSV file
+airbnb_df <- read.csv(file="dat/listings.csv", header=TRUE, sep=",")
+# Convert variables datatype
+airbnb_df$first_review <- as.Date(airbnb_df$first_review)
+airbnb_df$last_review <- as.Date(airbnb_df$last_review)
+airbnb_df$calendar_last_scraped <- as.Date(airbnb_df$calendar_last_scraped)
+airbnb_df$last_scraped <- as.Date(airbnb_df$last_scraped)
+airbnb_df$host_since <- as.Date(airbnb_df$host_since)
+airbnb_df$price <- as.numeric(gsub('\\$|,', '', airbnb_df$price))
+airbnb_df$weekly_price <- as.numeric(gsub('\\$|,', '', airbnb_df$weekly_price))
+airbnb_df$monthly_price <- as.numeric(gsub('\\$|,', '', airbnb_df$monthly_price))
+airbnb_df$security_deposit <- as.numeric(gsub('\\$|,', '', airbnb_df$security_deposit))
+airbnb_df$cleaning_fee <- as.numeric(gsub('\\$|,', '', airbnb_df$cleaning_fee))
+airbnb_df$extra_people <- as.numeric(gsub('\\$|,', '', airbnb_df$extra_people))
+
+# Subset hosts with 1 or more reviews
+airbnb_df <- airbnb_df %>%
+  filter(number_of_reviews > 0)
+
+```
+
+## Cantidad de alojamientos por tipo
+
+En el siguiente gráfico se muestra el número de alojamientos clasificado por tipo:
+
+```{r echo=FALSE}
+ggplot(airbnb_df, aes(room_type)) +
+  geom_bar() +
+  labs(x = "Room type", y= "Count")
+
+```
+
+
+## Barrios con mayor concentración de alojamientos
+
+```{r echo=FALSE}
+leaflet() %>% addTiles() %>% addCircles(data = airbnb_df, lat = ~ latitude, lng = ~ longitude)
+
+
+```
