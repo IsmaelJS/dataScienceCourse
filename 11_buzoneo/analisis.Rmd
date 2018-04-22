@@ -1,0 +1,41 @@
+---
+title: "Reto buzoneo"
+output: reto_buzoneo
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Creación del dataset
+
+```{r}
+creaDataset <- function (){
+madrid_df_indicadores <- read.csv("dat/raw/C2011_ccaa13_Indicadores.csv", colClasses = c("character","character","character","character","character", rep("integer",145)))
+madrid_df_edad <- read.csv("dat/raw/2801c.csv", stringsAsFactors = FALSE) %>%
+  select(c(1,10:12)) %>%
+  mutate("35-50" = X35.39 + X40.44 + X45.49) %>%
+  select(c(1,5))
+colnames(madrid_df_edad) <- c("seccion", "35-50")
+madrid_df_edad$seccion <- trimws(madrid_df_edad$seccion)
+
+madrid_df_indicadores <- madrid_df_indicadores %>%
+  filter(cmun == "079") %>%
+  mutate(seccion = paste(cpro,cmun,dist,secc, sep='')) %>%
+  select(seccion, t4_7, t7_6, t12_5) %>%
+  na.omit
+
+colnames(madrid_df_indicadores) <- c("seccion", "nacidos_china", "mujeres_mas_65", "estudios_tercer_grado")
+#madrid_df_indicadores$seccion <- as.character(madrid_df_indicadores$seccion)
+#madrid_df_indicadores$dist <- as.character(madrid_df_indicadores$dist)
+
+madrid_df_indicadores <- madrid_df_indicadores %>%
+  inner_join(madrid_df_edad, by="seccion")
+
+}
+
+creaDataset()
+```

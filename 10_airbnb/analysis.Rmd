@@ -5,8 +5,12 @@ date: "17 de marzo de 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, echo=FALSE}
+library(dplyr)
+library(labeling)
+library(ggplot2)
+library(leaflet)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Análisis del negocio de Airbnb
@@ -14,10 +18,6 @@ knitr::opts_chunk$set(echo = TRUE)
 En este documento se realizará un análisis acerca del modelo de negocio de Airbnb y su actividad en la ciudad de Madrid.
 
 ```{r echo=FALSE}
-library(dplyr)
-library(labeling)
-library(ggplot2)
-library(leaflet)
 # Load data from CSV file
 airbnb_df <- read.csv(file="dat/listings.csv", header=TRUE, sep=",")
 # Convert variables datatype
@@ -43,7 +43,7 @@ airbnb_df <- airbnb_df %>%
 
 En el siguiente gráfico se muestra el número de alojamientos clasificado por tipo:
 
-```{r echo=FALSE}
+```{r}
 ggplot(airbnb_df, aes(room_type)) +
   geom_bar() +
   labs(x = "Room type", y= "Count")
@@ -53,8 +53,27 @@ ggplot(airbnb_df, aes(room_type)) +
 
 ## Barrios con mayor concentración de alojamientos
 
+En el siguiente gráfico dinámico se representan los pisos anunciados en Airbnb en la ciudad de Madrid.
+
 ```{r echo=FALSE}
-leaflet() %>% addTiles() %>% addCircles(data = airbnb_df, lat = ~ latitude, lng = ~ longitude)
+leaflet() %>% addTiles() %>% addCircles(data = airbnb_df, lat = ~ latitude, lng = ~ longitude, radius = 5, stroke = FALSE, fillOpacity = 0.8)
+
+```
+
+## Alojamientos por tipo en los principales barrios de Madrid
+
+Vamos a comprobar los tipos de alojamientos que predominan en los principales barrios de Madrid por tipo:
+
+```{r echo=FALSE}
+data_principales <- filter(airbnb_df, neighbourhood_cleansed %in% c("Embajadores","Palacio", "Universidad", "Sol"))
+ggplot(data_principales, aes(x = neighbourhood_cleansed, fill=room_type)) +
+  geom_bar()
+
+ggplot(data_principales, aes(x = room_type)) +
+  geom_bar() +
+  facet_wrap(~neighbourhood_cleansed, scales = "free_y")
 
 
 ```
+
+
