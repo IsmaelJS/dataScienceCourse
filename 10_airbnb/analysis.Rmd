@@ -117,8 +117,10 @@ ggplot(airbnb_df, aes(x = business)) +
 
 
 ## Distribución del negocio en los barrios principales
-
+```{r}
 data_principales <- filter(airbnb_df, neighbourhood_cleansed %in% c("Embajadores","Palacio", "Universidad", "Sol"))
 ggplot(data_principales, aes(x = business)) +
   geom_bar() +
     facet_wrap(~neighbourhood_cleansed, scales = "free_y")
+```
+
