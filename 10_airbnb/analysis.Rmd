@@ -99,11 +99,6 @@ negocio <- airbnb_df %>%
   filter(room_type == "Entire home/apt") %>%
   select(host_id)
 
-
-airbnb_df <- airbnb_df %>%
-  mutate(business = '' )
-
-
 airbnb_df <- airbnb_df %>%
   mutate(business = ifelse(host_id %in% vacacional$host_id,"vacacional", ifelse(host_id %in% habitacion_propia$host_id,"habitacion propia", ifelse(host_id %in% negocio$host_id,"negocio", "segunda vivienda"))))
 
