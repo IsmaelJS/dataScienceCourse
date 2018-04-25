@@ -76,4 +76,49 @@ ggplot(data_principales, aes(x = room_type)) +
 
 ```
 
+## Analisis de negocio Airbnb
 
+```{r}
+
+vacacional <- airbnb_df %>%
+  group_by(host_id) %>%
+  filter(n()==1) %>%
+  filter(availability_365 < 90) %>%
+  select(host_id)
+  
+habitacion_propia <- airbnb_df %>%
+  group_by(host_id) %>%
+  filter(n()==1) %>%
+  filter(room_type == "Private room") %>%
+  select(host_id)
+
+negocio <- airbnb_df %>%
+  group_by(host_id) %>%
+  filter(n()>1) %>%
+  filter(availability_365 > 90) %>%
+  filter(room_type == "Entire home/apt") %>%
+  select(host_id)
+
+
+airbnb_df <- airbnb_df %>%
+  mutate(business = '' )
+
+
+airbnb_df <- airbnb_df %>%
+  mutate(business = ifelse(host_id %in% vacacional$host_id,"vacacional", ifelse(host_id %in% habitacion_propia$host_id,"habitacion propia", ifelse(host_id %in% negocio$host_id,"negocio", "segunda vivienda"))))
+
+
+ggplot(airbnb_df, aes(x = business)) +
+  geom_bar() 
+
+
+
+```
+
+
+## Distribución del negocio en los barrios principales
+
+data_principales <- filter(airbnb_df, neighbourhood_cleansed %in% c("Embajadores","Palacio", "Universidad", "Sol"))
+ggplot(data_principales, aes(x = business)) +
+  geom_bar() +
+    facet_wrap(~neighbourhood_cleansed, scales = "free_y")
