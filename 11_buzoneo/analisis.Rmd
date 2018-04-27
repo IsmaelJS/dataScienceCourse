@@ -1,13 +1,12 @@
 ---
 title: "Reto buzoneo"
-output: reto_buzoneo
+output: html_document
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
 library(dplyr)
 library(ggplot2)
-library(leaflet)
-knitr::opts_chunk$set(echo = FALSE)
+library(xlsx)
 ```
 
 ## Creación del dataset
@@ -17,10 +16,30 @@ creaDataset <- function (){
 madrid_df_indicadores <- read.csv("dat/raw/C2011_ccaa13_Indicadores.csv", colClasses = c("character","character","character","character","character", rep("integer",145)))
 madrid_df_edad <- read.csv("dat/raw/2801c.csv", stringsAsFactors = FALSE) %>%
   select(c(1,10:12)) %>%
-  mutate("35-50" = X35.39 + X40.44 + X45.49) %>%
+  mutate("medium_age" = X35.39 + X40.44 + X45.49) %>%
   select(c(1,5))
-colnames(madrid_df_edad) <- c("seccion", "35-50")
+colnames(madrid_df_edad) <- c("seccion", "medium_age")
 madrid_df_edad$seccion <- trimws(madrid_df_edad$seccion)
+
+madrid_total_df <- read.xlsx(file="dat/raw/Censo_2011_total.xlsx", sheetName = "Sheet0", colClasses= c("character", "numeric"))
+colnames(madrid_total_df) <- c("seccion", "total")
+
+universitarios_df <- read.xlsx(file="dat/raw/Censo_2011_estudiantes.xlsx", sheetName= "Sheet0")
+colnames(universitarios_df) <- c("seccion", "total", "estudiantes_universitarios", "no_estudiantes", "no_aplicable")
+
+universitarios_df <- universitarios_df %>%
+  select(seccion, estudiantes_universitarios)
+universitarios_df$seccion<- as.character(universitarios_df$seccion) 
+
+personas_con_grado_df <- read.xlsx(file="dat/raw/Censo_2011_ocupados_nivel_estudios.xlsx", sheetName="Sheet0", colClasses= c("character", "numeric"))
+
+personas_con_grado_df <- personas_con_grado_df %>%
+  select(Seccion.de.residencia, Tercer.grado)
+colnames(personas_con_grado_df) <- c("seccion", "tercer_grado")
+
+total_viviendas_df <- read.xlsx(file= "dat/raw/Censo_2011_total_viviendas.xlsx", sheetName = "Sheet0", colClasses= c("character", "numeric"))
+
+colnames(total_viviendas_df) <- c("seccion", "total_viviendas")
 
 madrid_df_indicadores <- madrid_df_indicadores %>%
   filter(cmun == "079") %>%
@@ -29,13 +48,50 @@ madrid_df_indicadores <- madrid_df_indicadores %>%
   na.omit
 
 colnames(madrid_df_indicadores) <- c("seccion", "nacidos_china", "mujeres_mas_65", "estudios_tercer_grado")
-#madrid_df_indicadores$seccion <- as.character(madrid_df_indicadores$seccion)
-#madrid_df_indicadores$dist <- as.character(madrid_df_indicadores$dist)
 
 madrid_df_indicadores <- madrid_df_indicadores %>%
-  inner_join(madrid_df_edad, by="seccion")
+  inner_join(madrid_df_edad, by="seccion") %>%
+  inner_join(madrid_total_df, by="seccion") %>%
+  inner_join(personas_con_grado_df, by="seccion") %>%
+  inner_join(universitarios_df, by="seccion") %>%
+  inner_join(total_viviendas_df, by="seccion")
 
+madrid_df_indicadores
 }
 
-creaDataset()
 ```
+
+
+
+##Calculo de las campañas
+En este apartado se realizan los estudios de las campañas
+
+```{r}
+madrid_df_indicadores <- creaDataset()
+
+campania_clases_espaniol <- madrid_df_indicadores %>%
+  mutate(total_personas_objetivo = nacidos_china) %>%
+  mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
+  mutate(total_folletos = total_viviendas) %>%
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+
+campania_haukers <- madrid_df_indicadores %>%
+  mutate(total_personas_objetivo = estudiantes_universitarios) %>%
+  mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
+  mutate(total_folletos = total_viviendas) %>%
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+
+campania_moviles <- madrid_df_indicadores %>%
+  mutate(total_personas_objetivo = mujeres_mas_65) %>%
+  mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
+  mutate(total_folletos = total_viviendas) %>%
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+
+campania_transporte <- madrid_df_indicadores %>%
+  mutate(total_personas_objetivo = estudios_tercer_grado * (medium_age /1000)) %>%
+  mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
+  mutate(total_folletos = total_viviendas) %>%
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+
+```
+
