@@ -136,7 +136,6 @@ madrid_df_edad$seccion &lt;- trimws(madrid_df_edad$seccion)
 madrid_total_df &lt;- read.xlsx(file=&quot;dat/raw/Censo_2011_total.xlsx&quot;, sheetName = &quot;Sheet0&quot;, colClasses= c(&quot;character&quot;, &quot;numeric&quot;))
 colnames(madrid_total_df) &lt;- c(&quot;seccion&quot;, &quot;total&quot;)
 
-
 universitarios_df &lt;- read.xlsx(file=&quot;dat/raw/Censo_2011_estudiantes.xlsx&quot;, sheetName= &quot;Sheet0&quot;)
 colnames(universitarios_df) &lt;- c(&quot;seccion&quot;, &quot;total&quot;, &quot;estudiantes_universitarios&quot;, &quot;no_estudiantes&quot;, &quot;no_aplicable&quot;)
 
@@ -161,8 +160,6 @@ madrid_df_indicadores &lt;- madrid_df_indicadores %&gt;%
   na.omit
 
 colnames(madrid_df_indicadores) &lt;- c(&quot;seccion&quot;, &quot;nacidos_china&quot;, &quot;mujeres_mas_65&quot;, &quot;estudios_tercer_grado&quot;)
-#madrid_df_indicadores$seccion &lt;- as.character(madrid_df_indicadores$seccion)
-#madrid_df_indicadores$dist &lt;- as.character(madrid_df_indicadores$dist)
 
 madrid_df_indicadores &lt;- madrid_df_indicadores %&gt;%
   inner_join(madrid_df_edad, by=&quot;seccion&quot;) %&gt;%
@@ -190,25 +187,210 @@ madrid_df_indicadores
   mutate(total_personas_objetivo = nacidos_china) %&gt;%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %&gt;%
   mutate(total_folletos = total_viviendas) %&gt;%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %&gt;%
+  arrange(desc(tasa_objetivo))
 
-campania_haukers &lt;- madrid_df_indicadores %&gt;%
+head(campania_clases_espaniol, n=10)</code></pre>
+<pre><code>##       seccion nacidos_china mujeres_mas_65 estudios_tercer_grado
+## 1  2807919034           230             95                   825
+## 2  2807919034           230             95                   825
+## 3  2807919034           230             95                   825
+## 4  2807911183           110             30                   855
+## 5  2807911183           110             30                   855
+## 6  2807911183           110             30                   855
+## 7  2807909087            50            185                  1135
+## 8  2807909087            50            185                  1135
+## 9  2807909087            50            185                  1135
+## 10 2807920104            60             65                   600
+##    medium_age total tercer_grado estudiantes_universitarios
+## 1         384  3370          685                         30
+## 2         162  3370          685                         30
+## 3         222  3370          685                         30
+## 4         973  2695          785                         60
+## 5         465  2695          785                         60
+## 6         508  2695          785                         60
+## 7         359  2555          770                         55
+## 8         146  2555          770                         55
+## 9         213  2555          770                         55
+## 10        731  2370          565                         25
+##    total_viviendas total_personas_objetivo porcentaje_objetivo
+## 1             1225                     230            6.824926
+## 2             1225                     230            6.824926
+## 3             1225                     230            6.824926
+## 4             1080                     110            4.081633
+## 5             1080                     110            4.081633
+## 6             1080                     110            4.081633
+## 7              635                      50            1.956947
+## 8              635                      50            1.956947
+## 9              635                      50            1.956947
+## 10             905                      60            2.531646
+##    total_folletos tasa_objetivo
+## 1            1225     187.75510
+## 2            1225     187.75510
+## 3            1225     187.75510
+## 4            1080     101.85185
+## 5            1080     101.85185
+## 6            1080     101.85185
+## 7             635      78.74016
+## 8             635      78.74016
+## 9             635      78.74016
+## 10            905      66.29834</code></pre>
+<pre class="r"><code>campania_haukers &lt;- madrid_df_indicadores %&gt;%
   mutate(total_personas_objetivo = estudiantes_universitarios) %&gt;%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %&gt;%
   mutate(total_folletos = total_viviendas) %&gt;%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %&gt;%
+  arrange(desc(tasa_objetivo))
 
-campania_moviles &lt;- madrid_df_indicadores %&gt;%
+head(campania_haukers, n=10)</code></pre>
+<pre><code>##       seccion nacidos_china mujeres_mas_65 estudios_tercer_grado
+## 1  2807908153             0             75                   635
+## 2  2807908153             0             75                   635
+## 3  2807908153             0             75                   635
+## 4  2807902094             0            170                  1000
+## 5  2807902094             0            170                  1000
+## 6  2807902094             0            170                  1000
+## 7  2807915180            30             55                  1355
+## 8  2807915180            30             55                  1355
+## 9  2807915180            30             55                  1355
+## 10 2807914089            30             35                   560
+##    medium_age total tercer_grado estudiantes_universitarios
+## 1         293  1925          560                        105
+## 2         132  1925          560                        105
+## 3         161  1925          560                        105
+## 4         285  2235          685                         95
+## 5         128  2235          685                         95
+## 6         157  2235          685                         95
+## 7         574  2930         1140                        120
+## 8         265  2930         1140                        120
+## 9         309  2930         1140                        120
+## 10        409  2320          445                         80
+##    total_viviendas total_personas_objetivo porcentaje_objetivo
+## 1              745                     105            5.454545
+## 2              745                     105            5.454545
+## 3              745                     105            5.454545
+## 4              765                      95            4.250559
+## 5              765                      95            4.250559
+## 6              765                      95            4.250559
+## 7             1060                     120            4.095563
+## 8             1060                     120            4.095563
+## 9             1060                     120            4.095563
+## 10             765                      80            3.448276
+##    total_folletos tasa_objetivo
+## 1             745      140.9396
+## 2             745      140.9396
+## 3             745      140.9396
+## 4             765      124.1830
+## 5             765      124.1830
+## 6             765      124.1830
+## 7            1060      113.2075
+## 8            1060      113.2075
+## 9            1060      113.2075
+## 10            765      104.5752</code></pre>
+<pre class="r"><code>campania_moviles &lt;- madrid_df_indicadores %&gt;%
   mutate(total_personas_objetivo = mujeres_mas_65) %&gt;%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %&gt;%
   mutate(total_folletos = total_viviendas) %&gt;%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)%&gt;%
+  arrange(desc(tasa_objetivo))
 
-campania_transporte &lt;- madrid_df_indicadores %&gt;%
+head(campania_moviles, n=10)</code></pre>
+<pre><code>##       seccion nacidos_china mujeres_mas_65 estudios_tercer_grado
+## 1  2807909072            15            310                  1035
+## 2  2807909072            15            310                  1035
+## 3  2807909072            15            310                  1035
+## 4  2807905053             0            280                  1025
+## 5  2807905053             0            280                  1025
+## 6  2807905053             0            280                  1025
+## 7  2807909087            50            185                  1135
+## 8  2807909087            50            185                  1135
+## 9  2807909087            50            185                  1135
+## 10 2807916036            10            270                  1135
+##    medium_age total tercer_grado estudiantes_universitarios
+## 1         565  2445          690                         60
+## 2         260  2445          690                         60
+## 3         305  2445          690                         60
+## 4         481  2700          700                         75
+## 5         218  2700          700                         75
+## 6         263  2700          700                         75
+## 7         359  2555          770                         55
+## 8         146  2555          770                         55
+## 9         213  2555          770                         55
+## 10        672  2660          900                         60
+##    total_viviendas total_personas_objetivo porcentaje_objetivo
+## 1             1010                     310           12.678937
+## 2             1010                     310           12.678937
+## 3             1010                     310           12.678937
+## 4              925                     280           10.370370
+## 5              925                     280           10.370370
+## 6              925                     280           10.370370
+## 7              635                     185            7.240705
+## 8              635                     185            7.240705
+## 9              635                     185            7.240705
+## 10            1060                     270           10.150376
+##    total_folletos tasa_objetivo
+## 1            1010      306.9307
+## 2            1010      306.9307
+## 3            1010      306.9307
+## 4             925      302.7027
+## 5             925      302.7027
+## 6             925      302.7027
+## 7             635      291.3386
+## 8             635      291.3386
+## 9             635      291.3386
+## 10           1060      254.7170</code></pre>
+<pre class="r"><code>campania_transporte &lt;- madrid_df_indicadores %&gt;%
   mutate(total_personas_objetivo = estudios_tercer_grado * (medium_age /1000)) %&gt;%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %&gt;%
   mutate(total_folletos = total_viviendas) %&gt;%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)</code></pre>
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %&gt;%
+  arrange(desc(tasa_objetivo))
+
+head(campania_transporte, n=10)</code></pre>
+<pre><code>##       seccion nacidos_china mujeres_mas_65 estudios_tercer_grado
+## 1  2807908167             0             65                  1495
+## 2  2807908161            35             55                  2020
+## 3  2807908173            15             60                  1640
+## 4  2807908171            10             20                  1650
+## 5  2807916108            10             80                  1520
+## 6  2807908164            60             80                  1590
+## 7  2807908170             0              0                  1285
+## 8  2807908176             0             25                   770
+## 9  2807909083             0             55                  1600
+## 10 2807921027             0             70                  1485
+##    medium_age total tercer_grado estudiantes_universitarios
+## 1        1357  3060         1310                          0
+## 2        1705  3820         1950                         10
+## 3        1304  3480         1425                         20
+## 4        1353  3350         1455                         10
+## 5        1275  3090         1300                         35
+## 6        1063  2985         1375                         25
+## 7        1144  2575         1175                          0
+## 8        1079  1625          680                         20
+## 9         938  2915         1215                         25
+## 10        915  2845         1250                         45
+##    total_viviendas total_personas_objetivo porcentaje_objetivo
+## 1             1115                2028.715            66.29788
+## 2             1895                3444.100            90.15969
+## 3             1225                2138.560            61.45287
+## 4             1355                2232.450            66.64030
+## 5             1205                1938.000            62.71845
+## 6             1130                1690.170            56.62211
+## 7             1015                1470.040            57.08893
+## 8              640                 830.830            51.12800
+## 9             1160                1500.800            51.48542
+## 10            1185                1358.775            47.76011
+##    total_folletos tasa_objetivo
+## 1            1115      1819.475
+## 2            1895      1817.467
+## 3            1225      1745.763
+## 4            1355      1647.565
+## 5            1205      1608.299
+## 6            1130      1495.726
+## 7            1015      1448.315
+## 8             640      1298.172
+## 9            1160      1293.793
+## 10           1185      1146.646</code></pre>
 </div>
 
 

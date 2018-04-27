@@ -73,25 +73,38 @@ campania_clases_espaniol <- madrid_df_indicadores %>%
   mutate(total_personas_objetivo = nacidos_china) %>%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
   mutate(total_folletos = total_viviendas) %>%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %>%
+  arrange(desc(tasa_objetivo))
+
+head(campania_clases_espaniol, n=10)
 
 campania_haukers <- madrid_df_indicadores %>%
   mutate(total_personas_objetivo = estudiantes_universitarios) %>%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
   mutate(total_folletos = total_viviendas) %>%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %>%
+  arrange(desc(tasa_objetivo))
+
+head(campania_haukers, n=10)
 
 campania_moviles <- madrid_df_indicadores %>%
   mutate(total_personas_objetivo = mujeres_mas_65) %>%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
   mutate(total_folletos = total_viviendas) %>%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)%>%
+  arrange(desc(tasa_objetivo))
 
+head(campania_moviles, n=10)
+
+  
 campania_transporte <- madrid_df_indicadores %>%
   mutate(total_personas_objetivo = estudios_tercer_grado * (medium_age /1000)) %>%
   mutate(porcentaje_objetivo = total_personas_objetivo/total*100) %>%
   mutate(total_folletos = total_viviendas) %>%
-  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos)
+  mutate(tasa_objetivo = 1000 * total_personas_objetivo / total_folletos) %>%
+  arrange(desc(tasa_objetivo))
+
+head(campania_transporte, n=10)
 
 ```
 
