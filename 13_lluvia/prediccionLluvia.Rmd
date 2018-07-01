@@ -1,0 +1,89 @@
+---
+title: "Predicción lluvia"
+author: "Ismael Jiménez"
+date: "1 de julio de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(chron)
+library(dplyr)
+library(rpart)
+library(pROC)
+library(randomForest)
+
+data_lluvia <- read.csv("data/weather.csv", sep = ";")
+
+#Exploración y limpieza de datos
+str(data_lluvia)
+summary(data_lluvia)
+
+data_lluvia <- data_lluvia %>%
+  mutate(l.temp.time = times(paste0(l.temp.time,":00"))) %>%
+  mutate(h.temp.time = times(paste0(h.temp.time,":00"))) %>%
+  mutate(gust.wind.time = times(paste0(gust.wind.time,":00")))
+
+set.seed(1234)
+
+#Conjunto de entrenamiento y test
+sample_rows <- sample(nrow(data_lluvia), 0.7 * nrow(data_lluvia))
+
+data_train <- data_lluvia[sample_rows,]
+data_test <- data_lluvia[-sample_rows,]
+
+#Modelo 1. Valor medio de Rain
+data_train_model1<- data_train %>%
+  mutate(mean_rain = mean(rain))
+
+data_test_model1<- data_test %>%
+  mutate(mean_rain = mean(rain))
+
+model1 <- lm(rain ~ mean_rain, data_train_model1)
+
+predictions1 <- predict(model1, data_test_model1)
+
+residuals1 <- predictions1 - data_test_model1$rain
+
+rmse1 <- sqrt(mean(residuals1^2))
+mae1 <- mean(abs(residuals1))
+(rmse1)
+(mae1)
+
+#Modelo 2. Regresión lineal
+
+model2 <- lm(rain ~ . , data_train)
+
+predictions2 <- predict(model2, data_test)
+
+residuals2 <- predictions2 - data_test$rain
+
+rmse2 <- sqrt(mean(residuals2^2))
+mae2 <- mean(abs(residuals2))
+(rmse2)
+(mae2)
+
+#Modelo 3. árboles de decisión
+
+model3 <- rpart(rain ~ ., data_train)
+plot(model3)
+
+#Compute ROC
+predictions3 <- predict(model3, data_test)
+model.roc3 <- roc(data_test$rain, predictions3)
+plot(model.roc3)
+auc(model.roc3)
+
+#Modelo 4 Random Forest
+model4 <- randomForest(rain ~ ., data_train, ntree=500)
+
+#Compute ROC
+predictions4 <- predict(model4, data_test)
+model.roc4 <- roc(data_test$rain, predictions4)
+plot(model.roc4)
+auc(model.roc4)
+
+```

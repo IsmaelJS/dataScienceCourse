@@ -1,0 +1,70 @@
+---
+title: '06'
+author: "Ismael Jiménez"
+date: "30 de junio de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r }
+
+library(randomForest)
+library(dplyr)
+library(modeest)
+library(pROC)
+library(caret)
+library(sampling)
+
+#Fix seed
+set.seed(1234)
+
+#Read data
+data <- read.csv("dat/credit.csv")
+
+#Extract information about dataset
+summary(data)
+str(data)
+
+### Sample data
+
+modaNumberOfDependents <- mlv(data$NumberOfDependents, method="mfv", na.rm = TRUE)$M
+
+data <- data %>%
+  
+  mutate(SeriousDlqin2yrs = ifelse(SeriousDlqin2yrs == 1, "Y", "N")) %>%
+  mutate(SeriousDlqin2yrs = as.factor(SeriousDlqin2yrs)) %>%
+  mutate(UnknownNumberOfDependents = is.na(NumberOfDependents)) %>%
+  mutate(UnknownMonthlyIncome = is.na(MonthlyIncome)) %>%
+  mutate(NumberOfDependents = ifelse(is.na(NumberOfDependents), modaNumberOfDependents, NumberOfDependents)) %>%
+  mutate (MonthlyIncome = ifelse(is.na(MonthlyIncome), 0, MonthlyIncome)) %>%
+  mutate(ZeroDebtRatio = ifelse(DebtRatio == 0, TRUE, FALSE)) %>%
+  mutate(DebtRatio = ifelse(UnknownMonthlyIncome == TRUE, 0, DebtRatio)) %>%
+  mutate(LogDebt = log(MonthlyIncome * DebtRatio)) %>%
+  mutate(LogDebt = ifelse(is.infinite(LogDebt), 0, LogDebt)) %>%
+  select(-X)
+  
+# Prepare data
+train.data.index.yes <- sample(which(data$SeriousDlqin2yrs == "Y") , 6000)
+train.data.index.no <- sample( which(data$SeriousDlqin2yrs == "N"),length(train.data.index.yes))
+
+train.data.index <- c(train.data.index.no, train.data.index.yes) 
+
+data_train <- data[train.data.index,]
+
+data_test <- data[-train.data.index,]
+
+#Create randomForest
+model <- randomForest(SeriousDlqin2yrs ~ ., data_train, ntree=500)
+
+#Importance variables
+summary(model)
+varImpPlot(model)
+
+#Compute ROC
+prediction.test <- predict(model, data_test, type = "vote")
+model.roc <- roc(data_test$SeriousDlqin2yrs, prediction.test[,2])
+plot(model.roc)
+auc(model.roc)
+```
